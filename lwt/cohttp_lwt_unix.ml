@@ -55,16 +55,18 @@ module IO = struct
 
   let read_exactly =
     check_debug
-      (fun ic buf off len ->
-        try_lwt Lwt_io.read_into_exactly ic buf off len >> return true
-        with End_of_file -> return false)
-     (fun ic buf off len ->
+      (fun ic len ->
+        let buf = String.create len in
+        try_lwt Lwt_io.read_into_exactly ic buf 0 len >> return (Some buf)
+        with End_of_file -> return None)
+     (fun ic len ->
+        let buf = String.create len in
         lwt rd =
-          try_lwt Lwt_io.read_into_exactly ic buf off len >> return true
-          with End_of_file -> return false in
+          try_lwt Lwt_io.read_into_exactly ic buf 0 len >> return (Some buf)
+          with End_of_file -> return None in
         (match rd with
-        |true -> Printf.eprintf "%4d <<< %S" (Unix.getpid ()) (String.sub buf off len)
-        |false -> Printf.eprintf "%4d <<< <EOF>\n" (Unix.getpid ()));
+        |Some buf -> Printf.eprintf "%4d <<< %S" (Unix.getpid ()) buf
+        |None -> Printf.eprintf "%4d <<< <EOF>\n" (Unix.getpid ()));
         return rd)
 
   let write =
