@@ -44,11 +44,12 @@ module IO = struct
       |`Ok len' -> return (String.sub buf 0 len')
       |`Eof -> return ""
 
-  let read_exactly ic buf pos len =
-    Reader.really_read ic ~pos ~len buf >>=
+  let read_exactly ic len =
+    let buf = String.create len in
+    Reader.really_read ic ~pos:0 ~len buf >>=
     function
-    |`Ok -> return true
-    |`Eof _ -> return false
+    |`Ok -> return (Some buf)
+    |`Eof _ -> return None
 
   let write oc buf =
     Writer.write oc buf;
