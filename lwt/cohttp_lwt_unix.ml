@@ -82,10 +82,39 @@ end
 
 module Request = Cohttp.Request.Make(IO)
 module Response = Cohttp.Response.Make(IO)
-module Body = Cohttp_lwt_body
-module Net = Cohttp_lwt_net
-module Client = Cohttp_lwt.Client(Request)(Response)(Net)
 
+
+module Client = struct
+  open Lwt
+  include Cohttp.Client.Make(IO)(Request)(Response)
+ 
+  let call ?headers ?(chunked=false) ?body meth uri =
+    let mvar = Lwt_mvar.create_empty () in
+    let state = ref `Waiting_for_response in
+    let signal_handler s =
+      match !state, s with
+      |`Waiting_for_response, `Response resp ->
+         let body, push_body = Lwt_stream.create () in
+         state := `Getting_body push_body;
+         Lwt_mvar.put mvar (resp, body)
+      |`Getting_body push_body, `Body buf ->
+         push_body (Some buf); (* TODO: Alas, no flow control here *)
+         return ()
+      |`Getting_body push_body, `Body_end ->
+         state := `Complete;
+         push_body None;
+         return ();
+      |`Waiting_for_response, (`Body _|`Body_end)
+      |_, `Failure
+      |`Getting_body _, `Response _ ->
+         (* TODO warning and non-fatal ? *)
+         assert false
+      |`Complete, _ -> return ()
+    in
+    return ()
+end
+
+(*
 module Server = struct
   open Lwt
   include Cohttp_lwt.Server(Request)(Response)(Net)
@@ -134,3 +163,4 @@ end
 let server ?timeout ~address ~port spec =
   lwt sockaddr = Net.build_sockaddr address port in
   Net.Tcp_server.init ~sockaddr ~timeout (Server.callback spec)
+*)
