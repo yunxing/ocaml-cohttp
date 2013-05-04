@@ -18,18 +18,55 @@
 open Core.Std
 open Async.Std
 
-module IO = Cohttp_async_io
+module IO = struct
+  type 'a t = 'a Deferred.t
+  let (>>=) = Deferred.(>>=)
+  let (>>) m n = m >>= fun _ -> n  
+  let return = Deferred.return
+
+  type ic = Reader.t
+  type oc = Writer.t
+
+  let iter fn x =
+    Deferred.List.iter x ~f:fn 
+
+  let read_line ic =
+    Reader.read_line ic >>=
+    function
+    |`Ok s -> return (Some s)
+    |`Eof -> return None
+
+  let read = 
+    let buf = String.create 4096 in
+    fun ic len ->
+      Reader.read ic ~len buf >>=
+      function
+      |`Ok len' -> return (String.sub buf 0 len')
+      |`Eof -> return ""
+
+  let read_exactly ic len =
+    let buf = String.create len in
+    Reader.really_read ic ~pos:0 ~len buf >>=
+    function
+    |`Ok -> return (Some buf)
+    |`Eof _ -> return None
+
+  let write oc buf =
+    Writer.write oc buf;
+    return ()
+end
 
 module Response = Cohttp.Response.Make(IO)
 module Request = Cohttp.Request.Make(IO)
 
-module Net =
-struct
+module Net = struct
   let connect ~uri ~f =
-    let ctx = Fable_async.init () in
-    Monitor.try_with (fun () -> Fable_async.connect ~ctx ~uri) >>= function
-      | Error exn -> f `Unknown_service (* TODO: propagate the error *)
-      | Ok (flow_state, reader, writer) -> f (`Ok (reader, writer))
+    let host = Option.value (Uri.host uri) ~default:"localhost" in
+    match Uri_services.tcp_port_of_uri ~default:"http" uri with
+    |None -> f `Unknown_service
+    |Some port ->
+      Tcp.with_connection (Tcp.to_host_and_port host port)
+       (fun _ ic oc -> f (`Ok (ic,oc)))
 end
 
 module Client = struct
@@ -69,7 +106,6 @@ module Client = struct
     Net.connect ~uri ~f:(function
     |`Unknown_service -> return None
     |`Ok (ic,oc) ->
-      let ic, oc = IO.create ic oc in
       (* Establish the remote HTTP connection *)
       call ?headers ~chunked ?body:response_body meth uri
       Response.State_types.({body; body_end; failure; response}) ic oc >>= fun () ->
