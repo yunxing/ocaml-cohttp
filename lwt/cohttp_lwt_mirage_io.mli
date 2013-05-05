@@ -15,7 +15,7 @@
  *
  *)
 
-include Cohttp.IO.S
+include Cohttp_protocol.IO.S
  with type 'a t = 'a Lwt.t
  and type ic = Net.Channel.t
  and type oc = Net.Channel.t

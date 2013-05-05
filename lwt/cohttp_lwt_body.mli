@@ -20,13 +20,13 @@ type t = contents option
 
 val string_of_body : t -> string Lwt.t
 val stream_of_body : t -> string Lwt_stream.t
-val create_stream : ('a -> Cohttp.Transfer.chunk Lwt.t) -> 'a -> string Lwt_stream.t
+val create_stream : ('a -> Cohttp_protocol.Transfer.chunk Lwt.t) -> 'a -> string Lwt_stream.t
 
 val body_of_string : string -> t
 val body_of_string_list : string list -> t
 val body_of_stream : string Lwt_stream.t -> t
 
-val get_transfer_encoding : t -> Cohttp.Transfer.encoding
+val get_transfer_encoding : t -> Cohttp_protocol.Transfer.encoding
 val get_length : t -> (int * t) Lwt.t
 val write_body : (string -> unit Lwt.t) -> t -> unit Lwt.t
 

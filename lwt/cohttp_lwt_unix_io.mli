@@ -15,7 +15,7 @@
  *
  *)
 
-include Cohttp.IO.S
+include Cohttp_protocol.IO.S
  with type 'a t = 'a Lwt.t
  and type ic = Lwt_io.input_channel
  and type oc = Lwt_io.output_channel

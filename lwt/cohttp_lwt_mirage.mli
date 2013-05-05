@@ -17,53 +17,53 @@
 
 module Body : module type of Cohttp_lwt_body
 
-module Request : Cohttp.Request.S 
+module Request : Cohttp_protocol.Request.S 
   with module IO = Cohttp_lwt_mirage_io
 
-module Response : Cohttp.Response.S 
+module Response : Cohttp_protocol.Response.S 
   with module IO = Cohttp_lwt_mirage_io
 
 module Client : sig
   val call :
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     ?body:Body.contents ->
     ?chunked:bool ->
-    Cohttp.Code.meth ->
+    Cohttp_protocol.Code.meth ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val head :
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val get :
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val delete :
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val post :
     ?body:Body.contents ->
     ?chunked:bool ->
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val put :
     ?body:Body.contents ->
     ?chunked:bool ->
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val patch :
     ?body:Body.contents ->
     ?chunked:bool ->
-    ?headers:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val post_form :
-    ?headers:Cohttp.Header.t ->
-    params:Cohttp.Header.t ->
+    ?headers:Cohttp_protocol.Header.t ->
+    params:Cohttp_protocol.Header.t ->
     Uri.t -> (Response.t * Body.t) option Lwt.t
 
   val callv :
@@ -87,12 +87,12 @@ module Server : sig
     val callback : config -> Net.Channel.t -> Net.Channel.t -> unit Lwt.t
 
     val respond_string :
-      ?headers:Cohttp.Header.t ->
-      status:Cohttp.Code.status_code ->
+      ?headers:Cohttp_protocol.Header.t ->
+      status:Cohttp_protocol.Code.status_code ->
       body:string -> unit -> (Response.t * Body.t) Lwt.t
 
     val respond_error :
-      status:Cohttp.Code.status_code ->
+      status:Cohttp_protocol.Code.status_code ->
       body:string -> unit -> (Response.t * Body.t) Lwt.t
 
    val respond_not_found :

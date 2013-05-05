@@ -17,8 +17,8 @@
 
 module IO = Cohttp_lwt_unix_io
 
-module Request = Cohttp.Request.Make(IO)
-module Response = Cohttp.Response.Make(IO)
+module Request = Cohttp_protocol.Request.Make(IO)
+module Response = Cohttp_protocol.Response.Make(IO)
 module Body = Cohttp_lwt_body
 module Net = Cohttp_lwt_net
 module Client = Cohttp_lwt.Client(IO)(Request)(Response)(Net)
@@ -42,7 +42,7 @@ module Server = struct
        if Unix.((stat fname).st_kind <> S_REG) then raise Isnt_a_file) in
       lwt ic = Lwt_io.open_file ~buffer_size:16384 ~mode:Lwt_io.input fname in
       lwt len = Lwt_io.length ic in
-      let encoding = Cohttp.Transfer.Fixed (Int64.to_int len) in
+      let encoding = Cohttp_protocol.Transfer.Fixed (Int64.to_int len) in
       let count = 16384 in
       let stream = Lwt_stream.from (fun () ->
         try_lwt 

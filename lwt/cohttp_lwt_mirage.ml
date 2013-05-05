@@ -15,7 +15,7 @@
  *
  *)
 
-open Cohttp
+open Cohttp_protocol
 open Lwt
 
 module IO = Cohttp_lwt_mirage_io

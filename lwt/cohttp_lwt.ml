@@ -15,13 +15,13 @@
  *
  *)
 
-open Cohttp
+open Cohttp_protocol
 open Lwt
 open Cohttp_lwt_make
 
-module Client(IO:Cohttp.IO.S with type 'a t = 'a Lwt.t)
-             (Request:Cohttp.Request.S with module IO = IO)
-             (Response:Cohttp.Response.S with module IO = IO)
+module Client(IO:Cohttp_protocol.IO.S with type 'a t = 'a Lwt.t)
+             (Request:Cohttp_protocol.Request.S with module IO = IO)
+             (Response:Cohttp_protocol.Response.S with module IO = IO)
              (Net:NET with type oc = Response.IO.oc and type ic = Response.IO.ic)  = struct
   let read_response ?closefn ic oc =
     match_lwt Response.read ic with
@@ -90,9 +90,9 @@ module Client(IO:Cohttp.IO.S with type 'a t = 'a Lwt.t)
     return resps
 end
 
-module Server(IO:Cohttp.IO.S with type 'a t = 'a Lwt.t)
-             (Request:Cohttp.Request.S with module IO = IO)
-             (Response:Cohttp.Response.S with module IO = IO)
+module Server(IO:Cohttp_protocol.IO.S with type 'a t = 'a Lwt.t)
+             (Request:Cohttp_protocol.Request.S with module IO = IO)
+             (Response:Cohttp_protocol.Response.S with module IO = IO)
              (Net:NET with type oc = Response.IO.oc and type ic = Response.IO.ic)  = struct
   module Transfer_IO = Transfer_io.Make(IO)
 
