@@ -17,13 +17,14 @@
 
 open Core.Std
 open Async.Std
-open Cohttp_async
+open Http.Std
 
 let show_headers h =
-  Cohttp.Header.iter (fun k v -> List.iter v ~f:(Printf.eprintf "%s: %s\n%!" k)) h
+  Http.Header.iter 
+    (fun k v -> List.iter v ~f:(Printf.eprintf "%s: %s\n%!" k)) h
 
 let make_net_req () =
-  let headers = Cohttp.Header.of_list ["connection","close"] in
+  let headers = Http.Header.of_list ["connection","close"] in
   let uri = Uri.of_string "http://anil.recoil.org/index.html" in
   let host = Option.value (Uri.host uri) ~default:"localhost" in
   match Uri_services.tcp_port_of_uri ~default:"http" uri with
@@ -31,13 +32,13 @@ let make_net_req () =
   |Some port ->
     Tcp.with_connection (Tcp.to_host_and_port host port)
      (fun _ ic oc ->
-       Client.get ~headers uri 
+       Http.Client.get ~headers uri 
        >>= function
        |None -> 
          prerr_endline "<request failed>";
          assert false
        |Some (res, body) ->
-         show_headers (Response.headers res);
+         show_headers (Http.Response.headers res);
          Pipe.iter body ~f:(fun b -> prerr_endline ("XX " ^ b); return ())
      )
 
