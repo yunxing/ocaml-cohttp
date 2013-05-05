@@ -56,8 +56,8 @@ module IO = struct
     return ()
 end
 
-module Response = Cohttp.Response.Make(IO)
-module Request = Cohttp.Request.Make(IO)
+module Http_response = Cohttp_protocol.Response.Make(IO)
+module Http_request = Cohttp_protocol.Request.Make(IO)
 
 module Net = struct
   let connect ~uri ~f =
@@ -69,15 +69,17 @@ module Net = struct
        (fun _ ic oc -> f (`Ok (ic,oc)))
 end
 
-module Low_level_client = Cohttp.Client.Make(IO)(Request)(Response)
+module Low_level_client = 
+  Cohttp_protocol.Client.Make
+   (IO)(Http_request)(Http_response)
 
 module Async_http_client = struct
 
-  type ret = (Response.t * string Pipe.Reader.t) option IO.t
+  type ret = (Http_response.t * string Pipe.Reader.t) option IO.t
 
   let call ?headers ?(chunked=false) ?body meth uri =
     let response_body = body in
-    let open Response.State_types.PStateIO in
+    let open Http_response.State_types.PStateIO in
     let ivar = Ivar.create () in
     let response resp =
       get >>= fun `Waiting_for_response ->
@@ -111,7 +113,7 @@ module Async_http_client = struct
     |`Ok (ic,oc) ->
       (* Establish the remote HTTP connection *)
       Low_level_client.call ?headers ~chunked ?body:response_body meth uri
-      Response.State_types.({body; body_end; failure; response}) ic oc >>= fun () ->
+      Http_response.State_types.({body; body_end; failure; response}) ic oc >>= fun () ->
       Ivar.read ivar >>= fun x -> 
       return (Some x)
     )
@@ -119,4 +121,4 @@ module Async_http_client = struct
 end
 
 type ret = Async_http_client.ret
-module Client = Cohttp.Client.Make_http_methods(Async_http_client)
+module Http_client = Cohttp_protocol.Client.Make_http_methods(Async_http_client)
