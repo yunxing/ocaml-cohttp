@@ -37,14 +37,23 @@ Flag nettests
   Description: run the internet-using tests
   Default: false
 
+Library cohttp_lwt_core
+  Build$: flag(lwt)
+  Install$: flag(lwt)
+  Path: lwt
+  Findlibname: lwt_core
+  FindlibParent: cohttp
+  BuildDepends: lwt, uri, cohttp.protocol, lwt.syntax
+  Modules: Cohttp_lwt, Cohttp_lwt_net, Cohttp_lwt_body
+ 
 Library cohttp_lwt_unix
   Build$: flag(lwt)
   Install$: flag(lwt)
   Path: lwt
   Findlibname: lwt
   FindlibParent: cohttp
-  BuildDepends: lwt.unix, lwt, uri, cohttp.protocol, lwt.ssl, lwt.syntax
-  Modules: Cohttp_lwt_unix_io, Cohttp_lwt_unix, Cohttp_lwt, Cohttp_lwt_net, Cohttp_lwt_body
+  BuildDepends: lwt.unix, lwt, cohttp.lwt_core, lwt.ssl, lwt.syntax
+  Modules: Cohttp_lwt_unix_io, Cohttp_lwt_unix
 
 Library cohttp_mirage
   Build$: flag(mirage)
@@ -52,8 +61,8 @@ Library cohttp_mirage
   Path: lwt
   Findlibname: mirage
   FindlibParent: cohttp
-  BuildDepends: uri, re, cohttp.protocol, lwt.syntax, mirage, mirage-net
-  Modules: Cohttp_lwt_mirage_io, Cohttp_lwt_mirage, Cohttp_lwt, Cohttp_lwt_body
+  BuildDepends: uri, re, cohttp.lwt_core, lwt.syntax, mirage, mirage-net
+  Modules: Cohttp_lwt_mirage_io, Cohttp_lwt_mirage
 
 Library cohttp_async
   Build$: flag(async)

@@ -29,7 +29,7 @@ module type NET = sig
 end
 
 module Client(IO:IO.S with type 'a t = 'a Lwt.t)
-             (Request:Request.S with module IO = IO)
+             (Request:Request.S with module IO=IO)
              (Response:Response.S with module IO = IO)
              (Net:NET with type oc = Response.IO.oc and type ic = Response.IO.ic)  = struct
   let read_response ?closefn ic oc =
