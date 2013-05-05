@@ -22,17 +22,17 @@ open Lwt
 open Cohttp_lwt_unix
      
 let make_net_req url () =
-  let headers = Cohttp.Header.of_list ["connection","close"] in
+  let headers = Cohttp_protocol.Header.of_list ["connection","close"] in
   Client.call ~headers `GET (Uri.of_string url) >>= function 
   |None -> assert false
   |Some (res, body) ->
     let headers = Response.headers res in
-    Cohttp.Header.iter
+    Cohttp_protocol.Header.iter
       (fun k v -> List.iter (Printf.eprintf "%s: %s\n%!" k) v) headers;
     Lwt_stream.iter_s (fun s -> return ()) (Body.stream_of_body body)
 
 let make_net_reqv () =
-  let last_header = Cohttp.Header.of_list ["connection","close"] in
+  let last_header = Cohttp_protocol.Header.of_list ["connection","close"] in
   let reqs = [
       Request.make ~meth:`GET (Uri.of_string "/foo"), None;
       Request.make ~meth:`GET (Uri.of_string "/foo2"), None;

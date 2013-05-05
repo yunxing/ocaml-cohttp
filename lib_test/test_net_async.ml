@@ -17,7 +17,7 @@
 
 open Core.Std
 open Async.Std
-open Http.Std
+open Cohttp.Async
 
 let show_headers h =
   Http.Header.iter 
@@ -32,13 +32,13 @@ let make_net_req () =
   |Some port ->
     Tcp.with_connection (Tcp.to_host_and_port host port)
      (fun _ ic oc ->
-       Http.Client.get ~headers uri 
+       Http_client.get ~headers uri 
        >>= function
        |None -> 
          prerr_endline "<request failed>";
          assert false
        |Some (res, body) ->
-         show_headers (Http.Response.headers res);
+         show_headers (Http_response.headers res);
          Pipe.iter body ~f:(fun b -> prerr_endline ("XX " ^ b); return ())
      )
 
@@ -56,29 +56,3 @@ let test_cases =
 	Async_unix.Shutdown.exit 0
   ) in
   Async_unix.Scheduler.go ()
-
-(*
-(* Returns true if the result list contains successes only.
-   Copied from oUnit source as it isnt exposed by the mli *)
-let rec was_successful =
-  function
-    | [] -> true
-    | RSuccess _::t
-    | RSkip _::t ->
-        was_successful t
-    | RFailure _::_
-    | RError _::_
-    | RTodo _::_ ->
-        false
-
-let _ =
-  let suite = "Parser" >::: test_cases in
-  let verbose = ref false in
-  let set_verbose _ = verbose := true in
-  Arg.parse
-    [("-verbose", Arg.Unit set_verbose, "Run the test in verbose mode.");]
-    (fun x -> raise (Arg.Bad ("Bad argument : " ^ x)))
-    ("Usage: " ^ Sys.argv.(0) ^ " [-verbose]");
-  if not (was_successful (run_test_tt ~verbose:!verbose suite)) then
-  exit 1
-*)

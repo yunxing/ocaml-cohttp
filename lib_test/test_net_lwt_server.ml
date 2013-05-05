@@ -19,8 +19,8 @@ open OUnit
 open Printf
 open Lwt
 
-open Cohttp
-open Cohttp_lwt_unix
+open Cohttp.Lwt
+
 let make_server () =
   let callback conn_id ?body req =
     match Request.path req with

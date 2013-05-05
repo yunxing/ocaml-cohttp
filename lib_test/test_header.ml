@@ -18,30 +18,30 @@
 open OUnit
 open Printf
 
-module H = Cohttp.Header
+module H = Cohttp_protocol.Header
 
 let valid_auth () =
-  let auth = Cohttp.Auth.Basic ("Aladdin", "open sesame") in
+  let auth = Cohttp_protocol.Auth.Basic ("Aladdin", "open sesame") in
   let h = H.add_authorization (H.init ()) auth in
   let digest = H.get h "authorization" in
   assert_equal digest (Some "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
   assert_equal (H.get_authorization h) (Some auth)
 
 let valid_set_cookie () =
-  let c = Cohttp.Cookie.Set_cookie_hdr.make ~expiry:`Session
+  let c = Cohttp_protocol.Cookie.Set_cookie_hdr.make ~expiry:`Session
      ~path:"/foo/bar" ~domain:"ocaml.org"
 	 ~secure:true ("key", "value") in
-  let k, v = Cohttp.Cookie.Set_cookie_hdr.serialize ~version:`HTTP_1_0 c in
+  let k, v = Cohttp_protocol.Cookie.Set_cookie_hdr.serialize ~version:`HTTP_1_0 c in
   assert_equal ~printer:(fun x -> x) ~msg:"header key" "Set-Cookie" k;
   assert_equal ~printer:(fun x -> x) ~msg:"header value" "key=value; domain=ocaml.org; path=/foo/bar; secure" v
 
 let valid_cookie () =
   let cookies = [ "foo", "bar"; "a", "b" ] in
-  let k, v = Cohttp.Cookie.Cookie_hdr.serialize cookies in
+  let k, v = Cohttp_protocol.Cookie.Cookie_hdr.serialize cookies in
   assert_equal ~msg:"key" "cookie" k;
   assert_equal ~msg:"value" "foo=bar; a=b" v;
-  let h = Cohttp.Header.of_list [ k, v ] in
-  let cookies = Cohttp.Cookie.Cookie_hdr.extract h in
+  let h = Cohttp_protocol.Header.of_list [ k, v ] in
+  let cookies = Cohttp_protocol.Cookie.Cookie_hdr.extract h in
   let printer x = String.concat "; " (List.map (fun (x, y) -> x ^ ":" ^ y) x) in
   assert_equal ~printer ~msg:"headers" [ "foo", "bar"; "a", "b" ] cookies
 

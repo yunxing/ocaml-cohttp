@@ -19,7 +19,7 @@ open OUnit
 open Printf
 open Lwt
 
-open Cohttp
+open Cohttp_protocol
 open Cohttp_lwt_unix
 
 let port = 8081

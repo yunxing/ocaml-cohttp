@@ -18,7 +18,7 @@
 open OUnit
 open Printf
 
-module A = Cohttp.Accept
+module A = Cohttp_protocol.Accept
 
 let test (parse,printer) s v () =
   assert_equal ~printer v (parse (Some s))
