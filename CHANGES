@@ -1,3 +1,6 @@
+0.9.8 (trunk):
+* Unhook Async backend from Fable library for now, to use standard Reader/Writer pairs.
+
 0.9.7 (2013-04-16):
 * Add 422 Unprocessable Entity code.
 * Refactor modules better across Lwt/Async, but incompatible with earlier releases for Async (Lwt is unchanged at present).
