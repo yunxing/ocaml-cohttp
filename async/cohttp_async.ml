@@ -69,8 +69,11 @@ module Net = struct
        (fun _ ic oc -> f (`Ok (ic,oc)))
 end
 
-module Client = struct
-  include Cohttp.Client.Make(IO)(Request)(Response)
+module Low_level_client = Cohttp.Client.Make(IO)(Request)(Response)
+
+module Async_http_client = struct
+
+  type ret = (Response.t * string Pipe.Reader.t) option IO.t
 
   let call ?headers ?(chunked=false) ?body meth uri =
     let response_body = body in
@@ -107,9 +110,13 @@ module Client = struct
     |`Unknown_service -> return None
     |`Ok (ic,oc) ->
       (* Establish the remote HTTP connection *)
-      call ?headers ~chunked ?body:response_body meth uri
+      Low_level_client.call ?headers ~chunked ?body:response_body meth uri
       Response.State_types.({body; body_end; failure; response}) ic oc >>= fun () ->
       Ivar.read ivar >>= fun x -> 
       return (Some x)
     )
+
 end
+
+type ret = Async_http_client.ret
+module Client = Cohttp.Client.Make_http_methods(Async_http_client)

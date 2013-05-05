@@ -23,35 +23,29 @@ module Make
 
   val call :
     ?headers:Header.t ->
-    ?chunked:bool -> ?body:(unit -> string option) -> Code.meth -> 
+    ?chunked:bool ->
+    ?body:(unit -> string option) -> 
+    Code.meth -> 
     Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
     IO.ic -> IO.oc -> unit IO.t
 
-  val head :
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler -> 
-    IO.ic -> IO.oc -> unit IO.t
+end
 
-  val get :
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
-    IO.ic -> IO.oc -> unit IO.t
+module type HTTP_CLIENT = sig
+  type ret
+  val call : 
+     ?headers:Header.t -> 
+     ?chunked:bool -> 
+     ?body:(unit -> string option) -> 
+     Code.meth -> Uri.t -> ret
+end
 
-  val delete :
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
-    IO.ic -> IO.oc -> unit IO.t
-
-  val post :
-    ?body:(unit -> string option) -> ?chunked:bool ->
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
-    IO.ic -> IO.oc -> unit IO.t
-
-  val put :
-    ?body:(unit -> string option) -> ?chunked:bool ->
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
-    IO.ic -> IO.oc -> unit IO.t
-
-  val patch :
-    ?body:(unit -> string option) -> ?chunked:bool ->
-    ?headers:Header.t -> Uri.t -> (Response.t, 'a) Response.State_types.response_handler ->
-    IO.ic -> IO.oc -> unit IO.t
-
+module Make_http_methods(Http_client:HTTP_CLIENT) : sig
+  open Http_client
+  val head : ?headers:Header.t -> Uri.t -> ret
+  val get : ?headers:Header.t -> Uri.t -> ret
+  val delete : ?headers:Header.t -> Uri.t -> ret
+  val post : ?body:(unit -> string option) -> ?chunked:bool -> ?headers:Header.t -> Uri.t -> ret
+  val put : ?body:(unit -> string option) -> ?chunked:bool -> ?headers:Header.t -> Uri.t -> ret
+  val patch : ?body:(unit -> string option) -> ?chunked:bool -> ?headers:Header.t -> Uri.t -> ret
 end

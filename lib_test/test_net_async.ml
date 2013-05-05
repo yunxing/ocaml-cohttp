@@ -31,7 +31,7 @@ let make_net_req () =
   |Some port ->
     Tcp.with_connection (Tcp.to_host_and_port host port)
      (fun _ ic oc ->
-       Client.call ~headers `GET uri 
+       Client.get ~headers uri 
        >>= function
        |None -> 
          prerr_endline "<request failed>";

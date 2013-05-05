@@ -69,12 +69,23 @@ module Make
            Request.write' req body oc >>= fun () -> 
            run_response (read_response signal ic)
     end
+end
 
+module type HTTP_CLIENT = sig
+  type ret
+  val call : 
+    ?headers:Header.t -> 
+    ?chunked:bool -> 
+    ?body:(unit -> string option) -> 
+    Code.meth -> Uri.t -> ret
+end
+
+module Make_http_methods(Http_client:HTTP_CLIENT) = struct
+  open Http_client
   let head ?headers uri = call ?headers `HEAD uri 
   let get ?headers uri = call ?headers `GET uri 
   let delete ?headers uri = call ?headers `DELETE uri 
-  let post ?body ?chunked ?headers uri = call ?headers ?body ?chunked `POST uri 
-  let put ?body ?chunked ?headers uri = call ?headers ?body ?chunked `PUT uri 
-  let patch ?body ?chunked ?headers uri = call ?headers ?body ?chunked `PATCH uri 
+  let post ?body ?chunked ?headers uri = call ?headers ?chunked ?body `POST uri 
+  let put ?body ?chunked ?headers uri = call ?headers ?chunked ?body `PUT uri 
+  let patch ?body ?chunked ?headers uri = call ?headers ?chunked ?body `PATCH uri 
 end
-
