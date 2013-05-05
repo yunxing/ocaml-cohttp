@@ -16,26 +16,27 @@
  *)
 
 module Make
-  (IO : IO.S)
-  (Request:Request.S with module IO=IO)
-  (Response:Response.S with module IO=IO) = struct
+    (IO : IO.S)
+    (Request:Request.S with module IO=IO)
+    (Response:Response.S with module IO=IO) = struct
   open IO
 
-  let read_response {Response.State_types.body; body_end; failure; response} ic =
+  let read_response 
+      {Response.State_types.body; body_end; failure; response} ic =
     let open Response.State_types.PStateIO in
     lift (Response.read ic)
     >>= function
-    |None -> failure
-    |Some res -> begin
-      response res >>= fun () -> 
-      match Response.has_body res with
-      |false -> 
-        body_end
-      |true -> 
-        Response.read_body res body ic >>= fun () -> 
-        body_end >>= fun () -> 
-        put `Complete
-    end
+      |None -> failure
+      |Some res -> begin
+          response res >>= fun () -> 
+          match Response.has_body res with
+          |false -> 
+            body_end
+          |true -> 
+            Response.read_body res body ic >>= fun () -> 
+            body_end >>= fun () -> 
+            put `Complete
+        end
 
   let run_response response = 
     Response.State_types.PStateIO.run response `Waiting_for_response >>=
@@ -44,31 +45,31 @@ module Make
   let call ?headers ?(chunked=false) ?body meth uri (signal:(_, _) Response.State_types.response_handler) ic oc =
     match body with
     |None ->
-       let encoding = Transfer.Fixed 0 in
-       let req = Request.make ~meth ~encoding ?headers ~body uri in
-       Request.write' req (fun () -> None) oc >>= fun () -> 
-       run_response (read_response signal ic)
+      let encoding = Transfer.Fixed 0 in
+      let req = Request.make ~meth ~encoding ?headers ~body uri in
+      Request.write' req (fun () -> None) oc >>= fun () -> 
+      run_response (read_response signal ic)
     |Some body -> begin
-       match chunked with
-       |true ->
-         let req = Request.make ~meth ?headers ~body uri in
-         Request.write' req (fun () -> None) oc >>= fun () ->
-         run_response (read_response signal ic)
-       |false ->
-         (* If chunked is not allowed, then call [body_fn] once insert length header *)
-         match body () with
-         |None ->
-           let encoding = Transfer.Fixed 0 in
-           let req = Request.make ~meth ~encoding ?headers ~body uri in
-           Request.write' req body oc >>= fun () -> 
-           run_response (read_response signal ic)
-         |Some buf ->
-           let clen = String.length buf in
-           let encoding = Transfer.Fixed clen in
-           let req = Request.make ~meth ~encoding ?headers ~body uri in
-           Request.write' req body oc >>= fun () -> 
-           run_response (read_response signal ic)
-    end
+        match chunked with
+        |true ->
+          let req = Request.make ~meth ?headers ~body uri in
+          Request.write' req (fun () -> None) oc >>= fun () ->
+          run_response (read_response signal ic)
+        |false ->
+          (* If chunked is not allowed, then call [body_fn] once insert length header *)
+          match body () with
+          |None ->
+            let encoding = Transfer.Fixed 0 in
+            let req = Request.make ~meth ~encoding ?headers ~body uri in
+            Request.write' req body oc >>= fun () -> 
+            run_response (read_response signal ic)
+          |Some buf ->
+            let clen = String.length buf in
+            let encoding = Transfer.Fixed clen in
+            let req = Request.make ~meth ~encoding ?headers ~body uri in
+            Request.write' req body oc >>= fun () -> 
+            run_response (read_response signal ic)
+      end
 end
 
 module type HTTP_CLIENT = sig
