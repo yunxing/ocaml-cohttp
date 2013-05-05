@@ -17,11 +17,20 @@
 
 open Cohttp_protocol
 open Lwt
-open Cohttp_lwt_make
 
-module Client(IO:Cohttp_protocol.IO.S with type 'a t = 'a Lwt.t)
-             (Request:Cohttp_protocol.Request.S with module IO = IO)
-             (Response:Cohttp_protocol.Response.S with module IO = IO)
+module type NET = sig
+  type ic
+  type oc
+  val connect_uri : Uri.t -> (ic * oc) Lwt.t
+  val connect : ?ssl:bool -> string -> int -> (ic * oc) Lwt.t
+  val close_in : ic -> unit
+  val close_out : oc -> unit
+  val close : ic -> oc -> unit
+end
+
+module Client(IO:IO.S with type 'a t = 'a Lwt.t)
+             (Request:Request.S with module IO = IO)
+             (Response:Response.S with module IO = IO)
              (Net:NET with type oc = Response.IO.oc and type ic = Response.IO.ic)  = struct
   let read_response ?closefn ic oc =
     match_lwt Response.read ic with
@@ -90,9 +99,9 @@ module Client(IO:Cohttp_protocol.IO.S with type 'a t = 'a Lwt.t)
     return resps
 end
 
-module Server(IO:Cohttp_protocol.IO.S with type 'a t = 'a Lwt.t)
-             (Request:Cohttp_protocol.Request.S with module IO = IO)
-             (Response:Cohttp_protocol.Response.S with module IO = IO)
+module Server(IO:IO.S with type 'a t = 'a Lwt.t)
+             (Request:Request.S with module IO = IO)
+             (Response:Response.S with module IO = IO)
              (Net:NET with type oc = Response.IO.oc and type ic = Response.IO.ic)  = struct
   module Transfer_IO = Transfer_io.Make(IO)
 
