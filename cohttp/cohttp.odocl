@@ -1,20 +1,4 @@
 # OASIS_START
-# DO NOT EDIT (digest: 65aca631d53444ba72857176ad80e33d)
-IO
-State_types
-Code
-Header
-Cookie
-Request
-Response
-Transfer
-Accept
-Accept_parser
-Accept_lexer
-Base64
-Auth
-Header_io
-Transfer_io
-Client
-Body
+# DO NOT EDIT (digest: 2818f8cf1c0cba1b1e5c99d56c9af8db)
+../std/Cohttp
 # OASIS_STOP
