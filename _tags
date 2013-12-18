@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 34cfc630efe139056434de798589c0f0)
+# DO NOT EDIT (digest: 3712c80f17d19f492070ced00633e9b0)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -54,22 +54,33 @@
 <lwt/*.ml{,i}>: pkg_fieldslib
 <lwt/*.ml{,i}>: pkg_fieldslib.syntax
 # Library cohttp_mirage_unix
-"mirage/cohttp_mirage_unix.cmxs": use_cohttp_mirage_unix
-<mirage/*.ml{,i}>: pkg_mirage-tcpip-unix
+"mirage/unix/cohttp_mirage_unix.cmxs": use_cohttp_mirage_unix
+<mirage/unix/*.ml{,i}>: use_cohttp_lwt
+<mirage/unix/*.ml{,i}>: use_cohttp
+<mirage/unix/*.ml{,i}>: pkg_uri
+<mirage/unix/*.ml{,i}>: pkg_mirage-types
+<mirage/unix/*.ml{,i}>: pkg_cstruct
+<mirage/unix/*.ml{,i}>: pkg_mirage-tcpip-unix
+<mirage/unix/*.ml{,i}>: pkg_lwt
+<mirage/unix/*.ml{,i}>: pkg_lwt.syntax
+<mirage/unix/*.ml{,i}>: pkg_re
+<mirage/unix/*.ml{,i}>: pkg_uri.services
+<mirage/unix/*.ml{,i}>: pkg_fieldslib
+<mirage/unix/*.ml{,i}>: pkg_fieldslib.syntax
 # Library cohttp_mirage_xen
-"mirage/cohttp_mirage_xen.cmxs": use_cohttp_mirage_xen
-<mirage/*.ml{,i}>: use_cohttp_lwt
-<mirage/*.ml{,i}>: use_cohttp
-<mirage/*.ml{,i}>: pkg_uri
-<mirage/*.ml{,i}>: pkg_mirage-types
-<mirage/*.ml{,i}>: pkg_cstruct
-<mirage/*.ml{,i}>: pkg_mirage-tcpip-xen
-<mirage/*.ml{,i}>: pkg_lwt
-<mirage/*.ml{,i}>: pkg_lwt.syntax
-<mirage/*.ml{,i}>: pkg_re
-<mirage/*.ml{,i}>: pkg_uri.services
-<mirage/*.ml{,i}>: pkg_fieldslib
-<mirage/*.ml{,i}>: pkg_fieldslib.syntax
+"mirage/xen/cohttp_mirage_xen.cmxs": use_cohttp_mirage_xen
+<mirage/xen/*.ml{,i}>: use_cohttp_lwt
+<mirage/xen/*.ml{,i}>: use_cohttp
+<mirage/xen/*.ml{,i}>: pkg_uri
+<mirage/xen/*.ml{,i}>: pkg_mirage-types
+<mirage/xen/*.ml{,i}>: pkg_cstruct
+<mirage/xen/*.ml{,i}>: pkg_mirage-tcpip-xen
+<mirage/xen/*.ml{,i}>: pkg_lwt
+<mirage/xen/*.ml{,i}>: pkg_lwt.syntax
+<mirage/xen/*.ml{,i}>: pkg_re
+<mirage/xen/*.ml{,i}>: pkg_uri.services
+<mirage/xen/*.ml{,i}>: pkg_fieldslib
+<mirage/xen/*.ml{,i}>: pkg_fieldslib.syntax
 # Library cohttp_async
 "async/cohttp_async.cmxs": use_cohttp_async
 <async/*.ml{,i}>: use_cohttp

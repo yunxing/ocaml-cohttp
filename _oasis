@@ -56,7 +56,7 @@ Library cohttp_lwt_unix
 Library cohttp_mirage_unix
   Build$: flag(mirage_unix)
   Install$: flag(mirage_unix)
-  Path: mirage
+  Path: mirage/unix
   Findlibname: mirage-unix
   FindlibParent: cohttp
   BuildDepends: cohttp.lwt-core, mirage-types, cstruct, mirage-tcpip-unix
@@ -65,7 +65,7 @@ Library cohttp_mirage_unix
 Library cohttp_mirage_xen
   Build$: flag(mirage_xen)
   Install$: flag(mirage_xen)
-  Path: mirage
+  Path: mirage/xen
   Findlibname: mirage-xen
   FindlibParent: cohttp
   BuildDepends: cohttp.lwt-core, mirage-types, cstruct, mirage-tcpip-xen
